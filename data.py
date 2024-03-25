@@ -1,3 +1,6 @@
+import os
+
+
 class Category:
     def __init__(self, row):
         self.d1 = row['category_d1']
@@ -33,25 +36,12 @@ class OriginalRecs:
     def get_non_reference(self):
         return [original for original in self.originals if not original.is_reference]
 
-    def __str__(self):
-        return '\n'.join([str(original) for original in self.originals])
+    def discard_non_existing(self, ref_dir, non_ref_dir):
+        print("Size before discarding non existing: ", len(self.originals))
 
+        self.originals = [original for original in self.originals if
+                          (original.is_reference and os.path.exists(f"{ref_dir}/{original.filename}")) or
+                          (not original.is_reference and os.path.exists(
+                              f"{non_ref_dir}/{original.classname}/{original.filename}"))]
 
-class Reference:
-    def __init__(self, row):
-        self.filename = row['reference_filename']
-
-    def __str__(self):
-        return f"Reference: {self.filename}"
-
-
-class Imitation:
-    def __init__(self, row):
-        self.ID = row['imitation_id']
-        self.imitation_filename = row['imitation_filename']
-        self.category = Category(row)
-        self.reference = Reference(row)
-        self.participant = row['participant_id']
-        self.satisfaction = row['satisfaction']
-        self.description = row['participants_sound_recording_description']
-        self.confidence = row['participants_sound_recording_description_confidence']
+        print("Size after discarding non existing: ", len(self.originals))
